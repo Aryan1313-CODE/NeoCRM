@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum AuditResult {
+  SUCCESS
+  DENIED
+  FAILURE
+}
+
+model Organization {
+  id        String      @id @default(uuid())
+  name      String
+  industry  String
+  location  String
+  currency  String      @default("INR")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  users     User[]
+  customers Customer[]
+  leads     Lead[]
+  quotes    Quote[]
+  audits    AuditLog[]
+}
+
+model User {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  email          String       @unique
+  passwordHash   String
+  status         UserStatus   @default(ACTIVE)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  roles        UserRole[]
+  audits       AuditLog[]
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  description String?
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  resource    String
+  action      String
+  roles       RolePermission[]
+
+  @@unique([resource, action])
+}
+
+model UserRole {
+  userId String
+  roleId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@index([roleId])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model Lead {
+  id             String       @id @default(uuid())
+  organizationId String
+  company        String
+  contactName    String
+  status         String       @default("NEW")
+  value          Decimal      @default(0) @db.Decimal(14, 2)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId, status])
+  @@index([organizationId, createdAt])
+}
+
+model Quote {
+  id             String       @id @default(uuid())
+  organizationId String
+  customerName   String
+  status         String       @default("DRAFT")
+  amount         Decimal      @default(0) @db.Decimal(14, 2)
+  createdAt      DateTime     @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId, status])
+}
+
+model AuditLog {
+  id             String      @id @default(uuid())
+  organizationId String
+  actorUserId    String?
+  action         String
+  resource       String
+  resourceId     String?
+  result         AuditResult
+  beforeState    Json?
+  afterState     Json?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime    @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  actor        User?        @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([action, result, createdAt])
+  @@index([resource, resourceId])
+}
+
+model Customer {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  company        String
+  type           String
+  industry       String
+  location       String
+  status         String       @default("Active")
+  lastContactAt  DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@index([company])
+  @@index([status])
+}
