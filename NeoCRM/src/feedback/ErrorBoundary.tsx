@@ -1,0 +1,3 @@
+﻿import { Component, type ErrorInfo, type ReactNode } from 'react';
+type Props={children:ReactNode};type State={failed:boolean};
+export class ErrorBoundary extends Component<Props,State>{state:State={failed:false};static getDerivedStateFromError(){return{failed:true};}componentDidCatch(_error:Error,_info:ErrorInfo){/* Technical details stay out of the user interface. */}render(){if(!this.state.failed)return this.props.children;return <main className="access-state-page" role="alert"><section className="card access-state-card"><p className="eyebrow">NEOCRM</p><h1>Something went wrong</h1><p>NeoCRM couldn’t display this page.</p><button className="button button-primary" onClick={()=>this.setState({failed:false})}>Try again</button></section></main>;}}
