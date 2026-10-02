@@ -1,19 +1,14 @@
 import uuid
-from sqlalchemy import String, DateTime, ForeignKey, CheckConstraint, Index, UniqueConstraint, func, column
+from sqlalchemy import String, DateTime, ForeignKey, Boolean, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
 from app.db.base import Base
 class User(Base):
     __tablename__ = "users"
-    __table_args__ = (
-        CheckConstraint("status IN ('ACTIVE', 'INACTIVE')", name="ck_users_status"),
-        Index("ix_users_org", "organization_id"),
-        Index("ix_users_org_created", "organization_id", "created_at"),
-        Index("uq_users_email_lower", func.lower(column("email")), unique=True),
-    )
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    organization_id: Mapped[str] = mapped_column(ForeignKey("organizations.id"))
+    organization_id: Mapped[str] = mapped_column(ForeignKey("organizations.id"), index=True)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
-    email: Mapped[str] = mapped_column(String(320), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(320), unique=True, index=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(500), nullable=False)
     status: Mapped[str] = mapped_column(String(20), default="ACTIVE", index=True, nullable=False)
     created_at: Mapped[object] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
@@ -32,7 +27,6 @@ class Role(Base):
 
 class Permission(Base):
     __tablename__ = "permissions"
-    __table_args__ = (UniqueConstraint("resource", "action", name="uq_permission_resource_action"),)
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     resource: Mapped[str] = mapped_column(String(80), nullable=False)
     action: Mapped[str] = mapped_column(String(80), nullable=False)
@@ -54,10 +48,9 @@ class RolePermission(Base):
 
 class Session(Base):
     __tablename__ = "sessions"
-    __table_args__ = (Index("ix_sessions_user", "user_id"), Index("ix_sessions_jti", "jti"))
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    jti: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    jti: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
     expires_at: Mapped[object] = mapped_column(DateTime(timezone=True), nullable=False)
     revoked_at: Mapped[object | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[object] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)

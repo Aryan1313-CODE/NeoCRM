@@ -1,0 +1,2 @@
+import React from "react";
+export function PlaceholderPage({ title, description }) { return <div><div className="page-heading"><div><p className="eyebrow">NEOCRM MODULE</p><h1>{title}</h1><p>{description}</p></div></div><section className="panel settings-panel"><div className="settings-content"><h3>Module boundary</h3><p>This route is intentionally connected to the real permission model without introducing mock production data.</p><span className="status-pill active">Permission Protected</span></div></section></div>; }

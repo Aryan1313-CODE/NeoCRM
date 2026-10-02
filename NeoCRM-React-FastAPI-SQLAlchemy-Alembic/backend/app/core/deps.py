@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from fastapi import Depends, Header, HTTPException, Request
 from sqlalchemy.orm import Session, joinedload
 from app.db.session import get_db
@@ -6,8 +5,8 @@ from app.core.security import decode_token
 from app.models import User, Session as LoginSession, UserRole, Role, RolePermission
 from app.services.audit_service import write_audit
 
-def db(session: Session = Depends(get_db)):
-    yield session
+def db():
+    yield from get_db()
 
 def current_user(request: Request, authorization: str | None = Header(default=None), db: Session = Depends(db)) -> User:
     if not authorization or not authorization.startswith("Bearer "):
@@ -16,12 +15,8 @@ def current_user(request: Request, authorization: str | None = Header(default=No
         payload = decode_token(authorization[7:])
     except Exception:
         raise HTTPException(401, detail="Invalid or expired token")
-    sid = db.query(LoginSession).filter(
-        LoginSession.jti == payload.get("jti"),
-        LoginSession.revoked_at.is_(None),
-        LoginSession.expires_at > datetime.now(timezone.utc),
-    ).first()
-    if not sid or sid.user_id != payload.get("sub"):
+    sid = db.query(LoginSession).filter(LoginSession.jti == payload.get("jti"), LoginSession.revoked_at.is_(None)).first()
+    if not sid:
         raise HTTPException(401, detail="Invalid or revoked session")
     user = (
         db.query(User)
