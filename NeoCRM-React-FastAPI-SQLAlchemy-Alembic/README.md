@@ -33,3 +33,20 @@ Default login: `admin@chemora.com` / `Admin@123`
 ## Migration policy
 
 Alembic migrations are the production schema source of truth. The old Prisma `db push --accept-data-loss` flow has been removed.
+
+## Frontend architecture
+
+The frontend is organized by responsibility while keeping the existing FastAPI contracts intact:
+
+- `src/app` — application composition and global loading state.
+- `src/routes` — centralized React Router route tree and protected routes.
+- `src/auth` — authentication/session provider.
+- `src/permissions` — permission definitions, provider, route guards and UI gates.
+- `src/components/layout` — application shell, sidebar and topbar.
+- `src/components/ui` — reusable Button, Card, Badge, Dialog and Input primitives.
+- `src/components/settings` — settings navigation layout.
+- `src/feedback` — error boundary and user feedback/toasts.
+- `src/services` — API client and domain service adapters for auth, customers, users, organization, audit and dashboard.
+- `src/pages` — focused page modules instead of a single frontend monolith.
+
+Mock adapters remain isolated behind `VITE_USE_MOCK_API` for development only; production remains connected to the FastAPI backend.
