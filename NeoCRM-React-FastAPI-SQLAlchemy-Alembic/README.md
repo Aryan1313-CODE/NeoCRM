@@ -6,6 +6,11 @@ NeoCRM is now a single Python business backend architecture:
 
 FastAPI includes CRM APIs and the AI service boundary. SQLAlchemy is the ORM and Alembic is the schema migration system. The frontend API contract from the previous Node/Prisma prototype is preserved, so the existing React screens continue to work without a rewrite.
 
+## Project reference documents
+
+- [78-day delivery plan](docs/reference/NeoCRM_Inventory_78_Day_Plan.pdf)
+- [Inventory architecture design](docs/reference/NeoCRM_Inventory_Architecture_Design.pdf)
+
 ## Docker
 
 ```bash
