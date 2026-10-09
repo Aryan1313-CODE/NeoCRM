@@ -3,8 +3,8 @@ from app.db.session import SessionLocal
 from app.models import *
 from app.core.security import hash_password
 ORG_ID='00000000-0000-0000-0000-000000000001'
-PERMS=[('dashboard','read'),('customers','read'),('customers','write'),('leads','read'),('deals','read'),('products','read'),('quotes','read'),('orders','read'),('compliance','read'),('analytics','read'),('tasks','read'),('users','read'),('users','write'),('organization','read'),('organization','write'),('audit','read')]
-ROLE_PERMS={'admin':[f'{r}:{a}' for r,a in PERMS],'sales_manager':['dashboard:read','customers:read','customers:write','leads:read','deals:read','products:read','quotes:read','orders:read','compliance:read','analytics:read','tasks:read'],'sales':['dashboard:read','customers:read','customers:write','leads:read','deals:read','products:read','quotes:read','tasks:read'],'inventory':['dashboard:read','products:read','orders:read','compliance:read'],'auditor':['dashboard:read','audit:read']}
+PERMS=[('dashboard','read'),('customers','read'),('customers','write'),('leads','read'),('leads','write'),('deals','read'),('products','read'),('quotes','read'),('orders','read'),('compliance','read'),('analytics','read'),('tasks','read'),('users','read'),('users','write'),('organization','read'),('organization','write'),('audit','read')]
+ROLE_PERMS={'admin':[f'{r}:{a}' for r,a in PERMS],'sales_manager':['dashboard:read','customers:read','customers:write','leads:read','leads:write','deals:read','products:read','quotes:read','orders:read','compliance:read','analytics:read','tasks:read'],'sales':['dashboard:read','customers:read','customers:write','leads:read','leads:write','deals:read','products:read','quotes:read','tasks:read'],'inventory':['dashboard:read','products:read','orders:read','compliance:read'],'auditor':['dashboard:read','audit:read']}
 def seed():
  db=SessionLocal()
  try:
